@@ -31,11 +31,13 @@
     .search-input:focus { border-color: #38bdf8; }
 
     .restaurant-list { display: flex; flex-direction: column; gap: 12px; }
-    .restaurant-card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 14px; display: flex; align-items: center; gap: 14px; cursor: pointer; transition: 0.2s; }
+    .restaurant-card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 14px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: 0.2s; }
     .restaurant-card:active { transform: scale(0.98); background: #334155; }
+    .card-left { display: flex; align-items: center; gap: 14px; }
     .restaurant-card img { width: 48px; height: 48px; border-radius: 10px; object-fit: cover; }
     .restaurant-info h3 { font-size: 1rem; color: #f8fafc; margin-bottom: 2px; }
     .restaurant-info p { font-size: 0.85rem; color: #94a3b8; }
+    .qr-btn { background: #334155; border: none; color: #38bdf8; padding: 8px 12px; border-radius: 8px; font-size: 1.1rem; cursor: pointer; }
 
     /* Čat prikaz */
     .chat-container { display: none; flex-direction: column; height: 100%; }
@@ -49,12 +51,13 @@
     .chat-input { flex: 1; background: #0f172a; border: 1px solid #334155; border-radius: 20px; padding: 10px 16px; color: #fff; outline: none; }
     .send-btn { background: #0284c7; color: #fff; border: none; border-radius: 20px; padding: 0 18px; font-weight: 600; cursor: pointer; }
 
-    /* Modal za API ključ */
-    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); align-items: center; justify-content: center; padding: 20px; }
-    .modal-content { background: #1e293b; padding: 20px; border-radius: 16px; width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 14px; }
+    /* Modali */
+    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); align-items: center; justify-content: center; padding: 20px; z-index: 1000; }
+    .modal-content { background: #1e293b; padding: 20px; border-radius: 16px; width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 14px; text-align: center; }
     .modal-content input { padding: 12px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: #fff; }
     .modal-content button { padding: 12px; background: #0284c7; color: #fff; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
 
+    .qr-image { width: 220px; height: 220px; margin: 10px auto; border-radius: 12px; background: #fff; padding: 10px; }
     .info-text { text-align: center; color: #64748b; margin-top: 20px; font-size: 0.9rem; }
   </style>
 </head>
@@ -63,10 +66,10 @@
   <!-- Glavni Header -->
   <div class="app-header" id="mainHeader">
     <h1>PP Konobar</h1>
-    <button class="btn-icon" onclick="toggleModal(true)">⚙️</button>
+    <button class="btn-icon" onclick="toggleModal('settingsModal', true)">⚙️</button>
   </div>
 
-  <!-- Prikaz Pretrage -->
+  <!-- Prikaz Pretraga -->
   <div class="main-content" id="searchView">
     <div class="search-box">
       <input type="text" id="searchInput" class="search-input" onkeyup="filterRestaurants()" placeholder="Pronađi svoj lokal (npr. Mondo)...">
@@ -76,7 +79,7 @@
     <div id="noResults" class="info-text" style="display: none;">Nije pronađen nijedan lokal.</div>
   </div>
 
-  <!-- Prikaz Čata -->
+  <!-- Prikaz Čat -->
   <div class="chat-container" id="chatView">
     <div class="chat-header">
       <button class="btn-icon" onclick="exitChat()">⬅️</button>
@@ -89,18 +92,27 @@
     </div>
   </div>
 
-  <!-- Modal za Podešavanja -->
+  <!-- Modal API -->
   <div class="modal" id="settingsModal">
     <div class="modal-content">
       <h3>Podešavanja API Ključa</h3>
       <input type="password" id="apiKeyInput" placeholder="Unesite Gemini API Key">
       <button onclick="saveApiKey()">Sačuvaj</button>
-      <button onclick="toggleModal(false)" style="background: #334155;">Zatvori</button>
+      <button onclick="toggleModal('settingsModal', false)" style="background: #334155;">Zatvori</button>
+    </div>
+  </div>
+
+  <!-- Modal QR Kod -->
+  <div class="modal" id="qrModal">
+    <div class="modal-content">
+      <h3 id="qrModalTitle">QR Kod za Restoran</h3>
+      <img id="qrCodeImg" class="qr-image" src="" alt="QR Code">
+      <p style="font-size: 0.85rem; color: #94a3b8;">Skeniranjem ovog koda gost direktno otvara čat restorana.</p>
+      <button onclick="toggleModal('qrModal', false)" style="background: #334155;">Zatvori</button>
     </div>
   </div>
 
   <script>
-    // Baza restorana
     const restaurants = [
       {
         id: "mondo-sarajevo",
@@ -124,11 +136,23 @@ Uvijek budi ljubazan i pomozi gostima oko menija, rezervacija i informacija o re
 
     let currentRestaurant = null;
 
-    // Inicijalizacija
     window.onload = () => {
-      renderRestaurants(restaurants);
       const savedKey = localStorage.getItem('gemini_api_key');
       if (savedKey) document.getElementById('apiKeyInput').value = savedKey;
+
+      // QR Kod URL parametar provera
+      const urlParams = new URLSearchParams(window.location.search);
+      const restaurantId = urlParams.get('r');
+
+      if (restaurantId) {
+        const target = restaurants.find(r => r.id === restaurantId);
+        if (target) {
+          openChat(restaurantId);
+          return;
+        }
+      }
+
+      renderRestaurants(restaurants);
     };
 
     function renderRestaurants(list) {
@@ -144,12 +168,15 @@ Uvijek budi ljubazan i pomozi gostima oko menija, rezervacija i informacija o re
 
       list.forEach(r => {
         container.innerHTML += `
-          <div class="restaurant-card" onclick="openChat('${r.id}')">
-            <img src="${r.icon}" alt="${r.name}">
-            <div class="restaurant-info">
-              <h3>${r.name}</h3>
-              <p>${r.city} • Kod: ${r.code}</p>
+          <div class="restaurant-card">
+            <div class="card-left" onclick="openChat('${r.id}')">
+              <img src="${r.icon}" alt="${r.name}">
+              <div class="restaurant-info">
+                <h3>${r.name}</h3>
+                <p>${r.city} • Kod: ${r.code}</p>
+              </div>
             </div>
+            <button class="qr-btn" onclick="showQRCode(event, '${r.id}')">📱</button>
           </div>
         `;
       });
@@ -231,14 +258,27 @@ Uvijek budi ljubazan i pomozi gostima oko menija, rezervacija i informacija o re
       if (e.key === 'Enter') sendMessage();
     }
 
-    function toggleModal(show) {
-      document.getElementById('settingsModal').style.display = show ? 'flex' : 'none';
+    function toggleModal(modalId, show) {
+      document.getElementById(modalId).style.display = show ? 'flex' : 'none';
+    }
+
+    function showQRCode(event, restaurantId) {
+      event.stopPropagation();
+      const restaurant = restaurants.find(r => r.id === restaurantId);
+      const baseUrl = window.location.href.split('?')[0];
+      const directUrl = `${baseUrl}?r=${restaurant.id}`;
+      
+      const qrApi = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(directUrl)}`;
+      
+      document.getElementById('qrModalTitle').innerText = restaurant.name;
+      document.getElementById('qrCodeImg').src = qrApi;
+      toggleModal('qrModal', true);
     }
 
     function saveApiKey() {
       const key = document.getElementById('apiKeyInput').value.trim();
       localStorage.setItem('gemini_api_key', key);
-      toggleModal(false);
+      toggleModal('settingsModal', false);
       alert('API Ključ je uspešno sačuvan!');
     }
   </script>
