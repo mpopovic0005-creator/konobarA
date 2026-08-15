@@ -1,1 +1,125 @@
-# konobarA
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AI Konobar App</title>
+    
+    <!-- PWA Postavke -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="AI Konobar">
+
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: #0f172a; color: #f8fafc; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        
+        /* App Header */
+        .app-header { background: #1e293b; padding: 16px; text-align: center; font-size: 1.1rem; font-weight: 700; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center; }
+        .app-header .status { font-size: 0.75rem; color: #22c55e; background: rgba(34, 197, 94, 0.1); padding: 4px 8px; border-radius: 12px; }
+
+        /* Chat Area */
+        .chat-body { flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+        .msg { max-width: 82%; padding: 12px 16px; border-radius: 18px; font-size: 0.95rem; line-height: 1.4; word-wrap: break-word; }
+        .msg-bot { background: #1e293b; color: #f8fafc; align-self: flex-start; border-bottom-left-radius: 4px; border: 1px solid #334155; }
+        .msg-user { background: #2563eb; color: #ffffff; align-self: flex-end; border-bottom-right-radius: 4px; }
+
+        /* Input Controls */
+        .chat-input { display: flex; padding: 12px 16px; background: #1e293b; border-top: 1px solid #334155; gap: 8px; align-items: center; }
+        .chat-input input { flex: 1; padding: 12px 16px; border-radius: 24px; border: 1px solid #334155; background: #0f172a; color: #fff; outline: none; font-size: 1rem; }
+        .chat-input input:focus { border-color: #2563eb; }
+        .chat-input button { padding: 12px 20px; border: none; background: #2563eb; color: white; font-weight: bold; border-radius: 24px; cursor: pointer; transition: 0.2s; }
+        .chat-input button:active { transform: scale(0.95); }
+    </style>
+</head>
+<body>
+
+    <div class="app-header">
+        <span>🍽️ AI Konobar</span>
+        <span class="status">● Aktivno</span>
+    </div>
+
+    <div class="chat-body" id="chat-body">
+        <div class="msg msg-bot">Dobrodošli u Restoran MonElnes! 🍷<br>Ja sam vaš digitalni konobar. Mogu vam preporučiti jela, odgovoriti na pitanja o sastojcima ili vam rezervisati sto. Kako vam mogu pomoći?</div>
+    </div>
+
+    <div class="chat-input">
+        <input type="text" id="user-input" placeholder="Napišite poruku..." />
+        <button id="send-btn">Pošalji</button>
+    </div>
+
+<script>
+    // Registracija PWA Service Workera
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js').catch(err => console.log('SW Greška:', err));
+    }
+
+    const GEMINI_API_KEY = "UBACI_SVOJ_GEMINI_API_KEY";
+
+    const SYSTEM_PROMPT = `
+Ti si profesionalan, ljubazan i efikasan AI Konobar u luksuznom restoranu "MonElnes".
+JELOVNIK:
+- Goveđi carpaccio - 14 EUR
+- Biftek u sosu od zelenog papra - 26 EUR (Laktoza)
+- Losos na žaru - 22 EUR (Riba, Laktoza)
+- Tagliatelle s tartufima - 18 EUR (Gluten, Laktoza)
+- Veganski Rižoto - 16 EUR (Gluten-free)
+- Tiramisu - 6 EUR
+- Souffle od čokolade - 7 EUR
+- Domaće vino (čaša) - 5 EUR / Pivo - 4 EUR / Espresso - 2 EUR
+
+Ako klijent želi rezervaciju, obavezno uzmi: Ime, Broj osoba, Datum i vrijeme, i Kontakt telefon.
+`;
+
+    const chatBody = document.getElementById("chat-body");
+    const userInput = document.getElementById("user-input");
+    const sendBtn = document.getElementById("send-btn");
+
+    let conversationHistory = [
+        { role: "user", parts: [{ text: "System Instruction: " + SYSTEM_PROMPT }] },
+        { role: "model", parts: [{ text: "Razumio sam sve instrukcije. Spreman sam za rad kao AI Konobar." }] }
+    ];
+
+    async function sendMessage() {
+        const text = userInput.value.trim();
+        if (!text) return;
+
+        appendMessage(text, "msg-user");
+        userInput.value = "";
+
+        conversationHistory.push({ role: "user", parts: [{ text: text }] });
+
+        try {
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ contents: conversationHistory })
+            });
+
+            const data = await response.json();
+            const botReply = data.candidates[0].content.parts[0].text;
+
+            appendMessage(botReply, "msg-bot");
+            conversationHistory.push({ role: "model", parts: [{ text: botReply }] });
+
+        } catch (error) {
+            appendMessage("Greška u povezivanju s Mrežom. Pokušajte ponovo.", "msg-bot");
+        }
+    }
+
+    function appendMessage(text, className) {
+        const msgDiv = document.createElement("div");
+        msgDiv.className = `msg ${className}`;
+        msgDiv.innerHTML = text.replace(/\n/g, "<br>");
+        chatBody.appendChild(msgDiv);
+        chatBody.scrollTop = chatBody.scrollHeight;
+    }
+
+    sendBtn.addEventListener("click", sendMessage);
+    userInput.addEventListener("keypress", (e) => { if (e.key === "Enter") sendMessage(); });
+</script>
+
+</body>
+</html>
