@@ -110,7 +110,7 @@
         icon: "IMG_0827.png",
         prompt: `Ti si AI konobar u Mondo Restaurant u Sarajevu (lokacija: PC Capital Tower, Džemala Bijedića bb).
 Radno vrijeme: do 23:00. Kontakt: 061 768 844. Prosječna cijena obroka je 15–20 KM po osobi. Dostava je moguća i preko Glovo-a.
-Uvijek budi ljubazan i pomzi gostima oko menija, rezervacija i informacija o restoranu.`
+Uvijek budi ljubazan i pomozi gostima oko menija, rezervacija i informacija o restoranu.`
       },
       {
         id: "monelnes",
@@ -202,7 +202,7 @@ Uvijek budi ljubazan i pomzi gostima oko menija, rezervacija i informacija o res
       }
 
       try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -213,12 +213,17 @@ Uvijek budi ljubazan i pomzi gostima oko menija, rezervacija i informacija o res
         });
 
         const data = await response.json();
-        const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "Izvinjavam se, došlo je do greške pri obradi zahtjeva.";
         
-        chatMessages.innerHTML += `<div class="msg bot">${reply}</div>`;
+        if (data.error) {
+          chatMessages.innerHTML += `<div class="msg bot">API Greška: ${data.error.message}</div>`;
+        } else {
+          const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "Nema odgovora od modela.";
+          chatMessages.innerHTML += `<div class="msg bot">${reply}</div>`;
+        }
+        
         chatMessages.scrollTop = chatMessages.scrollHeight;
       } catch (err) {
-        chatMessages.innerHTML += `<div class="msg bot">Greška u povezivanju sa AI servisom.</div>`;
+        chatMessages.innerHTML += `<div class="msg bot">Greška u mreži ili konekciji: ${err.message}</div>`;
       }
     }
 
