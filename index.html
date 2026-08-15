@@ -6,7 +6,7 @@
   <title>PP Konobar</title>
 
   <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="IMG_0827.png">
+  <link rel="apple-touch-icon" href="mondo-logo.png">
 
   <meta name="theme-color" content="#0f172a">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -121,7 +121,7 @@
         name: "Mondo Restaurant",
         city: "Sarajevo",
         code: "MO01",
-        icon: "mondo-logo.png", //<- naziv slike sa GitHub-a
+        icon: "mondo-logo.png", // Logo za Mondo Restaurant
         prompt: `Ti si AI konobar u Mondo Restaurant u Sarajevu (lokacija: PC Capital Tower, Džemala Bijedića bb).
 Radno vrijeme: do 23:00. Kontakt: 061 768 844. Prosječna cijena obroka je 15–20 KM po osobi. Dostava je moguća i preko Glovo-a.
 Uvijek budi ljubazan i pomozi gostima oko menija, rezervacija i informacija o restoranu.`
@@ -131,7 +131,7 @@ Uvijek budi ljubazan i pomozi gostima oko menija, rezervacija i informacija o re
         name: "MonElnes Restoran",
         city: "Beograd",
         code: "ME01",
-        icon: "IMG_0827.png", // Zmeni sa npr. "monelnes-logo.png"
+        icon: "mondo-logo.png", // Promeni u odgovarajući logo kada ga imaš
         prompt: "Ti si ljubazni AI konobar u luksuznom restoranu MonElnes. Nudiš vrhunska jela, vina i poslastice. Budi profesionalan i elegantan."
       }
     ];
@@ -196,7 +196,6 @@ Uvijek budi ljubazan i pomozi gostima oko menija, rezervacija i informacija o re
     function openChat(restaurantId) {
       currentRestaurant = restaurants.find(r => r.id === restaurantId);
       
-      // Postavljanje naziva i logotipa restorana u čatu
       document.getElementById('selectedRestaurantTitle').innerText = currentRestaurant.name;
       document.getElementById('chatRestaurantLogo').src = currentRestaurant.icon;
 
