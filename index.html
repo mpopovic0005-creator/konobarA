@@ -69,7 +69,7 @@
   <!-- Prikaz Pretrage -->
   <div class="main-content" id="searchView">
     <div class="search-box">
-      <input type="text" id="searchInput" class="search-input" onkeyup="filterRestaurants()" placeholder="Pronađi svoj lokal (npr. MonElnes)...">
+      <input type="text" id="searchInput" class="search-input" onkeyup="filterRestaurants()" placeholder="Pronađi svoj lokal (npr. Mondo)...">
     </div>
 
     <div class="restaurant-list" id="restaurantList"></div>
@@ -103,20 +103,22 @@
     // Baza restorana
     const restaurants = [
       {
+        id: "mondo-sarajevo",
+        name: "Mondo Restaurant",
+        city: "Sarajevo",
+        code: "MO01",
+        icon: "IMG_0827.png",
+        prompt: `Ti si AI konobar u Mondo Restaurant u Sarajevu (lokacija: PC Capital Tower, Džemala Bijedića bb).
+Radno vrijeme: do 23:00. Kontakt: 061 768 844. Prosječna cijena obroka je 15–20 KM po osobi. Dostava je moguća i preko Glovo-a.
+Uvijek budi ljubazan i pomzi gostima oko menija, rezervacija i informacija o restoranu.`
+      },
+      {
         id: "monelnes",
         name: "MonElnes Restoran",
         city: "Beograd",
         code: "ME01",
         icon: "IMG_0827.png",
         prompt: "Ti si ljubazni AI konobar u luksuznom restoranu MonElnes. Nudiš vrhunska jela, vina i poslastice. Budi profesionalan i elegantan."
-      },
-      {
-        id: "pizzeria-roma",
-        name: "Pizzeria Roma",
-        city: "Novi Sad",
-        code: "PR02",
-        icon: "IMG_0827.png",
-        prompt: "Ti si AI konobar u Pizzeriji Roma. Specijalitet su vam prave italijanske pice iz peći na drva i paste."
       }
     ];
 
@@ -199,7 +201,6 @@
         return;
       }
 
-      // Poziv Gemini API-ja
       try {
         const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
           method: 'POST',
