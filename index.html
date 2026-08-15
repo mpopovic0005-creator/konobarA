@@ -42,6 +42,7 @@
     /* Čat prikaz */
     .chat-container { display: none; flex-direction: column; height: 100%; }
     .chat-header { background: #1e293b; padding: 12px 16px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #334155; }
+    .chat-header img { width: 36px; height: 36px; border-radius: 8px; object-fit: cover; }
     .chat-body { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
     .msg { max-width: 80%; padding: 12px 16px; border-radius: 16px; font-size: 0.95rem; line-height: 1.4; }
     .msg.bot { background: #1e293b; color: #f8fafc; align-self: flex-start; border-bottom-left-radius: 4px; }
@@ -83,6 +84,7 @@
   <div class="chat-container" id="chatView">
     <div class="chat-header">
       <button class="btn-icon" onclick="exitChat()">⬅️</button>
+      <img id="chatRestaurantLogo" src="" alt="Logo">
       <h3 id="selectedRestaurantTitle" style="font-size: 1rem; color: #fff;"></h3>
     </div>
     <div class="chat-body" id="chatMessages"></div>
@@ -119,7 +121,7 @@
         name: "Mondo Restaurant",
         city: "Sarajevo",
         code: "MO01",
-        icon: "IMG_0827.png",
+        icon: "mondo-logo.png", // Putanja do fajla logotipa restorana
         prompt: `Ti si AI konobar u Mondo Restaurant u Sarajevu (lokacija: PC Capital Tower, Džemala Bijedića bb).
 Radno vrijeme: do 23:00. Kontakt: 061 768 844. Prosječna cijena obroka je 15–20 KM po osobi. Dostava je moguća i preko Glovo-a.
 Uvijek budi ljubazan i pomozi gostima oko menija, rezervacija i informacija o restoranu.`
@@ -129,7 +131,7 @@ Uvijek budi ljubazan i pomozi gostima oko menija, rezervacija i informacija o re
         name: "MonElnes Restoran",
         city: "Beograd",
         code: "ME01",
-        icon: "IMG_0827.png",
+        icon: "IMG_0827.png", // Zmeni sa npr. "monelnes-logo.png"
         prompt: "Ti si ljubazni AI konobar u luksuznom restoranu MonElnes. Nudiš vrhunska jela, vina i poslastice. Budi profesionalan i elegantan."
       }
     ];
@@ -140,7 +142,6 @@ Uvijek budi ljubazan i pomozi gostima oko menija, rezervacija i informacija o re
       const savedKey = localStorage.getItem('gemini_api_key');
       if (savedKey) document.getElementById('apiKeyInput').value = savedKey;
 
-      // QR Kod URL parametar provera
       const urlParams = new URLSearchParams(window.location.search);
       const restaurantId = urlParams.get('r');
 
@@ -194,7 +195,11 @@ Uvijek budi ljubazan i pomozi gostima oko menija, rezervacija i informacija o re
 
     function openChat(restaurantId) {
       currentRestaurant = restaurants.find(r => r.id === restaurantId);
+      
+      // Postavljanje naziva i logotipa restorana u čatu
       document.getElementById('selectedRestaurantTitle').innerText = currentRestaurant.name;
+      document.getElementById('chatRestaurantLogo').src = currentRestaurant.icon;
+
       document.getElementById('searchView').style.display = 'none';
       document.getElementById('mainHeader').style.display = 'none';
       document.getElementById('chatView').style.display = 'flex';
