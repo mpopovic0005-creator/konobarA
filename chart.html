@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Trading Chart AI Analyzer</title>
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: #0f172a; color: #f8fafc; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+
+    /* Header */
+    .app-header { background: #1e293b; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; }
+    .app-header h1 { font-size: 1.2rem; font-weight: 700; color: #38bdf8; }
+    .btn-icon { background: transparent; border: none; color: #94a3b8; font-size: 1.2rem; cursor: pointer; }
+
+    /* Main Layout */
+    .main-container { flex: 1; display: flex; flex-direction: column; overflow-y: auto; padding: 16px; gap: 16px; max-width: 800px; margin: 0 auto; width: 100%; }
+
+    /* Drop / Paste Zone */
+    .upload-zone { background: #1e293b; border: 2px dashed #38bdf8; border-radius: 16px; padding: 20px; text-align: center; cursor: pointer; transition: 0.2s; position: relative; }
+    .upload-zone:hover { background: #334155; }
+    .upload-zone p { color: #94a3b8; font-size: 0.9rem; margin-top: 8px; }
+    #fileInput { display: none; }
+
+    /* Preview */
+    .preview-container { display: none; position: relative; width: 100%; max-height: 250px; overflow: hidden; border-radius: 12px; border: 1px solid #334155; }
+    .preview-container img { width: 100%; height: 100%; object-fit: contain; background: #000; }
+    .remove-btn { position: absolute; top: 8px; right: 8px; background: rgba(239, 68, 68, 0.8); color: #fff; border: none; border-radius: 50%; width: 28px; height: 28px; font-weight: bold; cursor: pointer; }
+
+    /* Chat Messages */
+    .chat-box { flex: 1; display: flex; flex-direction: column; gap: 12px; min-height: 200px; }
+    .msg { padding: 14px 18px; border-radius: 14px; font-size: 0.95rem; line-height: 1.5; white-space: pre-wrap; }
+    .msg.user { background: #0284c7; color: #fff; align-self: flex-end; max-width: 85%; }
+    .msg.bot { background: #1e293b; color: #f8fafc; align-self: flex-start; border: 1px solid #334155; width: 100%; }
+    .msg.system-error { background: #7f1d1d; color: #fca5a5; }
+
+    /* Controls */
+    .input-area { background: #1e293b; padding: 12px; border-top: 1px solid #334155; display: flex; gap: 8px; border-radius: 16px; }
+    .chat-input { flex: 1; background: #0f172a; border: 1px solid #334155; border-radius: 10px; padding: 10px 14px; color: #fff; outline: none; }
+    .send-btn { background: #0284c7; color: #fff; border: none; border-radius: 10px; padding: 0 18px; font-weight: 600; cursor: pointer; }
+
+    /* Modal */
+    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); align-items: center; justify-content: center; padding: 20px; z-index: 1000; }
+    .modal-content { background: #1e293b; padding: 20px; border-radius: 16px; width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 14px; text-align: center; }
+    .modal-content input { padding: 12px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: #fff; outline: none; }
+    .modal-content button { padding: 12px; background: #0284c7; color: #fff; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+  </style>
+</head>
+<body>
+
+  <div class="app-header">
+    <h1>📈 AI Chart Analyzer</h1>
+    <button class="btn-icon" onclick="toggleModal(true)">⚙️</button>
+  </div>
+
+  <div class="main-container">
+    <!-- Upload / Paste Zone -->
+    <div class="upload-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+      <p style="font-size: 1.1rem; color: #38bdf8; font-weight: 600;">Klikni ili prevuci screenshot grafikona</p>
+      <p>Možeš i direktno nalepiti sliku sa <b>Ctrl+V / Cmd+V</b></p>
+      <input type="file" id="fileInput" accept="image/*" onchange="handleFileSelect(event)">
+    </div>
+
+    <!-- Image Preview -->
+    <div class="preview-container" id="previewContainer">
+      <button class="remove-btn" onclick="clearImage()">✕</button>
+      <img id="imagePreview" src="" alt="Grafik Preview">
+    </div>
+
+    <!-- Chat Output -->
+    <div class="chat-box" id="chatBox">
+      <div class="msg bot">Dodaj ili nalepi screenshot grafikona, dodaj opcionalnu napomenu (npr. vremenski okvir, par) i klikni na <b>Analiziraj</b>.</div>
+    </div>
+
+    <!-- Input Bar -->
+    <div class="input-area">
+      <input type="text" id="extraText" class="chat-input" placeholder="Opcionalno: Npr. 15m timeframe, EUR/USD...">
+      <button class="send-btn" id="analyzeBtn" onclick="analyzeChart()">Analiziraj</button>
+    </div>
+  </div>
+
+  <!-- Modal API Key -->
+  <div class="modal" id="settingsModal">
+    <div class="modal-content">
+      <h3>Podešavanja API Ključa</h3>
+      <input type="password" id="apiKeyInput" placeholder="Unesite Gemini API Key">
+      <button onclick="saveApiKey()">Sačuvaj</button>
+      <button onclick="toggleModal(false)" style="background: #334155;">Zatvori</button>
+    </div>
+  </div>
+
+  <script>
+    let currentBase64Image = null;
+
+    // Inicijalizacija i učitavanje API ključa
+    window.onload = () => {
+      const savedKey = localStorage.getItem('gemini_api_key');
+      if (savedKey) document.getElementById('apiKeyInput').value = savedKey;
+    };
+
+    // Paste sa tastature (Ctrl+V)
+    document.addEventListener('paste', (e) => {
+      const items = e.clipboardData.items;
+      for (let item of items) {
+        if (item.type.indexOf('image') !== -1) {
+          const file = item.getAsFile();
+          processFile(file);
+          break;
+        }
+      }
+    });
+
+    function handleFileSelect(event) {
+      const file = event.target.files[0];
+      if (file) processFile(file);
+    }
+
+    function processFile(file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const fullBase64 = e.target.result;
+        currentBase64Image = fullBase64.split(',')[1];
+        
+        document.getElementById('imagePreview').src = fullBase64;
+        document.getElementById('previewContainer').style.display = 'block';
+        document.getElementById('dropZone').style.display = 'none';
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function clearImage() {
+      currentBase64Image = null;
+      document.getElementById('fileInput').value = '';
+      document.getElementById('previewContainer').style.display = 'none';
+      document.getElementById('dropZone').style.display = 'block';
+    }
+
+    async function analyzeChart() {
+      const apiKey = localStorage.getItem('gemini_api_key');
+      const extraText = document.getElementById('extraText').value.trim();
+      const chatBox = document.getElementById('chatBox');
+      const analyzeBtn = document.getElementById('analyzeBtn');
+
+      if (!apiKey) {
+        alert('Molimo podesite Gemini API ključ u podešavanjima (⚙️)!');
+        toggleModal(true);
+        return;
+      }
+
+      if (!currentBase64Image) {
+        alert('Molimo prvo ubacite ili nalepite screenshot grafikona.');
+        return;
+      }
+
+      // Prikaz korisničkog pitanja u čatu
+      chatBox.innerHTML += `<div class="msg user">Analiziraj ovaj grafik. ${extraText ? 'Napomena: ' + extraText : ''}</div>`;
+      
+      const loadingMsg = document.createElement('div');
+      loadingMsg.className = 'msg bot';
+      loadingMsg.innerText = 'Analiziram grafik, strukturu i nivoe... ⏳';
+      chatBox.appendChild(loadingMsg);
+      chatBox.scrollTop = chatBox.scrollHeight;
+
+      analyzeBtn.disabled = true;
+
+      const systemPrompt = `Ti si profesionalni institucionalni trading analitičar. Analiziraj priloženi screenshot trading grafikona.
+Ispitaj strukturu tržišta (BOS, CHoCH, Liquidity sweep, Fair Value Gaps, Support/Resistance, VWAP ako postoji).
+Pruži jasnu i struktuiranu analizu na srpskom/balkanskom jeziku u sledećem formatu:
+
+1. **PROCENA TRŽIŠTA:** [BUY / SELL / NEUTRAL]
+2. **STRUKTURA I KLJUČNI NIVOI:** [Objašnjenje šta se vidi na grafiku u 3 kratke tačke]
+3. **POTENCIJALNI SCENARIO (Plan):** [Gde potražiti ulaz, Stop Loss i Take Profit ako je vidljivo]
+4. **NAPOMENA O RIZIKU:** [Kratko upozorenje na rizik]
+
+Dodatni kontekst korisnika: ${extraText}`;
+
+      try {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{
+              parts: [
+                { text: systemPrompt },
+                { inline_data: { mime_type: "image/png", data: currentBase64Image } }
+              ]
+            }]
+          })
+        });
+
+        const data = await response.json();
+        
+        if (data.error) {
+          loadingMsg.className = 'msg bot system-error';
+          loadingMsg.innerText = `API Greška: ${data.error.message}`;
+        } else {
+          const resultText = data.candidates?.[0]?.content?.parts?.[0]?.text || "Nije bilo moguće analizirati sliku.";
+          loadingMsg.innerText = resultText;
+        }
+      } catch (err) {
+        loadingMsg.className = 'msg bot system-error';
+        loadingMsg.innerText = `Greška u konekciji: ${err.message}`;
+      } finally {
+        analyzeBtn.disabled = false;
+        chatBox.scrollTop = chatBox.scrollHeight;
+      }
+    }
+
+    function toggleModal(show) {
+      document.getElementById('settingsModal').style.display = show ? 'flex' : 'none';
+    }
+
+    function saveApiKey() {
+      const key = document.getElementById('apiKeyInput').value.trim();
+      localStorage.setItem('gemini_api_key', key);
+      toggleModal(false);
+      alert('API Ključ je uspešno sačuvan!');
+    }
+  </script>
+</body>
+</html>
