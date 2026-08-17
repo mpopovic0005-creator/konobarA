@@ -7,10 +7,11 @@
     <style>
         body { font-family: Arial, sans-serif; padding: 20px; background: #121212; color: #fff; }
         .container { max-width: 600px; margin: auto; background: #1e1e1e; padding: 20px; border-radius: 8px; }
-        input, button { margin-top: 15px; width: 100%; padding: 10px; box-sizing: border-box; }
-        button { background: #007bff; color: white; border: none; font-weight: bold; cursor: pointer; }
+        input, button { margin-top: 12px; width: 100%; padding: 12px; box-sizing: border-box; border-radius: 5px; border: 1px solid #333; background: #2a2a2a; color: #fff; }
+        button { background: #007bff; color: white; border: none; font-weight: bold; cursor: pointer; margin-top: 18px; }
         button:hover { background: #0056b3; }
-        #rezultat { margin-top: 20px; white-space: pre-wrap; background: #2a2a2a; padding: 15px; border-radius: 5px; }
+        #rezultat { margin-top: 20px; white-space: pre-wrap; background: #2a2a2a; padding: 15px; border-radius: 5px; line-height: 1.5; }
+        label { font-size: 14px; color: #aaa; margin-top: 10px; display: block; }
     </style>
 </head>
 <body>
@@ -18,18 +19,27 @@
 <div class="container">
     <h2>AI Trading Chart Analizator</h2>
     
+    <label for="apiKeyInput">Tvoj Gemini API Ključ:</label>
+    <input type="password" id="apiKeyInput" placeholder="Nalepi AIzaSy... ključ ovde">
+
+    <label for="imageInput">Slika grafikona:</label>
     <input type="file" id="imageInput" accept="image/*">
+    
     <button onclick="analizirajGrafikon()">Analiziraj Sliku i Daj Signal</button>
     
-    <div id="loading" style="display:none; margin-top: 15px;">Analiza u toku...</div>
+    <div id="loading" style="display:none; margin-top: 15px; color: #ffca28;">Analiza u toku...</div>
     <div id="rezultat"></div>
 </div>
 
 <script>
-    // 1. ZAMENI "TVOJ_GEMINI_API_KEY" SA TVOJIM STVARNIM GEMINI API KLJUČEM
-    const API_KEY = "TVOJ_GEMINI_API_KEY";
+    // Automatsko učitavanje zapamćenog ključa ako postoji
+    document.addEventListener("DOMContentLoaded", () => {
+        const savedKey = localStorage.getItem("gemini_api_key");
+        if (savedKey) {
+            document.getElementById('apiKeyInput').value = savedKey;
+        }
+    });
 
-    // 2. Sistemski prompt koji eliminiše "WAIT" odgovore
     const SYSTEM_INSTRUCTION = `
 Ti si stručni analitičar tehničke analize (SMC / Price Action).
 Tvoj zadatak je da na osnovu priložene slike grafikona ODMAH proceniš najbolju verovatnoću i pružiš konkretan signal.
@@ -49,14 +59,23 @@ Budi direktan, presudan i daj konkretne parametre bez izgovora.
 `;
 
     async function analizirajGrafikon() {
+        const apiKey = document.getElementById('apiKeyInput').value.trim();
         const fileInput = document.getElementById('imageInput');
         const resultDiv = document.getElementById('rezultat');
         const loadingDiv = document.getElementById('loading');
+
+        if (!apiKey) {
+            alert('Molimo unesi Gemini API ključ!');
+            return;
+        }
 
         if (!fileInput.files[0]) {
             alert('Molimo izaberi sliku grafikona!');
             return;
         }
+
+        // Sačuvaj ključ u lokalnoj memoriji pregledača za sledeći put
+        localStorage.setItem("gemini_api_key", apiKey);
 
         loadingDiv.style.display = 'block';
         resultDiv.innerText = '';
@@ -65,7 +84,8 @@ Budi direktan, presudan i daj konkretne parametre bez izgovora.
         const base64Image = await convertBase64(file);
         const base64Data = base64Image.split(',')[1];
 
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent?key=${API_KEY}`;
+        // Model postavljen na gemini-3.1-flash-lite-preview
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent?key=${apiKey}`;
 
         const payload = {
             system_instruction: {
@@ -100,7 +120,7 @@ Budi direktan, presudan i daj konkretne parametre bez izgovora.
             if (data.candidates && data.candidates[0].content.parts[0].text) {
                 resultDiv.innerText = data.candidates[0].content.parts[0].text;
             } else {
-                resultDiv.innerText = "Greška u odgovoru API-ja: " + JSON.stringify(data);
+                resultDiv.innerText = "Greška u odgovoru API-ja: " + JSON.stringify(data, null, 2);
             }
         } catch (error) {
             loadingDiv.style.display = 'none';
