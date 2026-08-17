@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Institutional AI Chart Analyzer (PRO)</title>
+    <title>1000% Honest Trading Analyzer</title>
     <style>
         :root {
-            --bg-color: #0d0e12;
-            --card-bg: #16181e;
-            --accent-color: #2563eb;
-            --text-color: #e2e8f0;
+            --bg-color: #090a0f;
+            --card-bg: #12151e;
+            --accent-color: #e11d48;
+            --text-color: #f3f4f6;
             --border-color: #27272a;
         }
 
@@ -25,7 +25,7 @@
 
         .container {
             width: 100%;
-            max-width: 920px;
+            max-width: 900px;
             display: flex;
             flex-direction: column;
             gap: 20px;
@@ -34,15 +34,12 @@
         .card {
             background-color: var(--card-bg);
             border: 1px solid var(--border-color);
-            border-radius: 10px;
+            border-radius: 12px;
             padding: 24px;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
         }
 
-        h1, h2, h3 {
-            margin-top: 0;
-            color: #ffffff;
-        }
+        h1, h3 { margin-top: 0; color: #ffffff; }
 
         .settings-group {
             display: flex;
@@ -50,30 +47,30 @@
             gap: 8px;
         }
 
-        input[type="text"], input[type="password"] {
-            background: #090a0f;
+        input[type="password"] {
+            background: #050508;
             border: 1px solid var(--border-color);
             color: #fff;
             padding: 12px;
-            border-radius: 6px;
+            border-radius: 8px;
             font-size: 14px;
             width: 100%;
             box-sizing: border-box;
         }
 
         .drop-zone {
-            border: 2px dashed #3b82f6;
-            border-radius: 10px;
+            border: 2px dashed #f43f5e;
+            border-radius: 12px;
             padding: 40px 20px;
             text-align: center;
             cursor: pointer;
-            background: #090a0f;
+            background: #050508;
             transition: all 0.2s ease;
         }
 
         .drop-zone:hover, .drop-zone.dragover {
-            background: #1e293b;
-            border-color: #60a5fa;
+            background: #1c1917;
+            border-color: #fb7185;
         }
 
         .preview-img {
@@ -91,84 +88,71 @@
             border: none;
             padding: 14px 20px;
             font-size: 16px;
-            font-weight: 600;
-            border-radius: 6px;
+            font-weight: 700;
+            border-radius: 8px;
             cursor: pointer;
             width: 100%;
             margin-top: 15px;
             transition: background 0.2s ease;
         }
 
-        button:hover {
-            background-color: #1d4ed8;
-        }
+        button:hover { background-color: #be123c; }
+        button:disabled { background-color: #3f3f46; cursor: not-allowed; }
 
-        button:disabled {
-            background-color: #3f3f46;
-            cursor: not-allowed;
-        }
-
-        .output-box {
-            margin-top: 10px;
-            display: none;
-        }
+        .output-box { margin-top: 10px; display: none; }
 
         .signal-badge {
             font-size: 24px;
-            font-weight: 800;
-            padding: 14px;
-            border-radius: 6px;
+            font-weight: 900;
+            padding: 16px;
+            border-radius: 8px;
             margin-bottom: 20px;
             text-align: center;
-            letter-spacing: 1px;
+            letter-spacing: 1.5px;
         }
 
-        .BUY { background-color: rgba(34, 197, 94, 0.15); color: #22c55e; border: 1px solid #22c55e; }
-        .SELL { background-color: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid #ef4444; }
-        .WAIT { background-color: rgba(234, 179, 8, 0.15); color: #eab308; border: 1px solid #eab308; }
+        .BUY { background-color: rgba(34, 197, 94, 0.15); color: #22c55e; border: 2px solid #22c55e; }
+        .SELL { background-color: rgba(239, 68, 68, 0.15); color: #ef4444; border: 2px solid #ef4444; }
+        .WAIT { background-color: rgba(234, 179, 8, 0.15); color: #eab308; border: 2px solid #eab308; }
 
-        .data-row {
-            margin-bottom: 12px;
-            line-height: 1.6;
+        .data-row { margin-bottom: 12px; line-height: 1.6; }
+        .data-row strong { color: #fff; }
+        .honest-box {
+            background: #180d11;
+            border-left: 4px solid #f43f5e;
+            padding: 12px 16px;
+            margin: 15px 0;
+            border-radius: 4px;
         }
 
-        .data-row strong {
-            color: #f8fafc;
-        }
-
-        hr {
-            border: 0;
-            height: 1px;
-            background: var(--border-color);
-            margin: 20px 0;
-        }
+        hr { border: 0; height: 1px; background: var(--border-color); margin: 20px 0; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>Institutional AI Chart Analyzer (PRO)</h1>
+    <h1>1000% Honest AI Trading Analyzer</h1>
 
     <div class="card">
-        <h3>Podešavanja API-ja</h3>
+        <h3>Podešavanja</h3>
         <div class="settings-group">
             <label for="apiKey">Gemini API Key:</label>
-            <input type="password" id="apiKey" placeholder="Unesi svoj Gemini API ključ">
+            <input type="password" id="apiKey" placeholder="Unesi svoj API ključ">
         </div>
     </div>
 
     <div class="card">
-        <h3>Čart Analiza</h3>
+        <h3>Sličica Čarta</h3>
         <div class="drop-zone" id="dropZone">
-            <p>Prevuci sliku čarta, zalepi iz clipboarda (Ctrl+V) ili klikni za otvaranje</p>
+            <p>Prevuci sliku čarta, nalepi (Ctrl+V) ili klikni za otvaranje</p>
             <input type="file" id="fileInput" accept="image/*" style="display: none;">
             <img id="previewImg" class="preview-img" alt="Čart Pregled">
         </div>
-        <button id="analyzeBtn" onclick="runAnalysis()" disabled>Analiziraj sa Gemini 1.5 Pro</button>
+        <button id="analyzeBtn" onclick="runAnalysis()" disabled>Analiziraj Iskreno (Gemini 3.1 Flash Lite)</button>
     </div>
 
     <div class="card output-box" id="outputCard">
-        <h3>SMC / ICT Dubinska Analiza</h3>
+        <h3>Brutalno Iskrena Analiza</h3>
         <div id="analysisContent"></div>
     </div>
 </div>
@@ -182,34 +166,23 @@
     const analyzeBtn = document.getElementById('analyzeBtn');
 
     dropZone.addEventListener('click', () => fileInput.click());
-
-    dropZone.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        dropZone.classList.add('dragover');
-    });
-
+    dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
     dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
-
     dropZone.addEventListener('drop', (e) => {
         e.preventDefault();
         dropZone.classList.remove('dragover');
-        if (e.dataTransfer.files.length > 0) {
-            handleFile(e.dataTransfer.files[0]);
-        }
+        if (e.dataTransfer.files.length > 0) handleFile(e.dataTransfer.files[0]);
     });
 
     fileInput.addEventListener('change', (e) => {
-        if (e.target.files.length > 0) {
-            handleFile(e.target.files[0]);
-        }
+        if (e.target.files.length > 0) handleFile(e.target.files[0]);
     });
 
     document.addEventListener('paste', (e) => {
         const items = (e.clipboardData || e.originalEvent.clipboardData).items;
         for (let item of items) {
             if (item.kind === 'file' && item.type.startsWith('image/')) {
-                const blob = item.getAsFile();
-                handleFile(blob);
+                handleFile(item.getAsFile());
                 break;
             }
         }
@@ -228,56 +201,44 @@
 
     async function runAnalysis() {
         const apiKey = document.getElementById('apiKey').value.trim();
-        if (!apiKey) {
-            alert("Unesi Gemini API ključ.");
-            return;
-        }
-
-        if (!currentBase64Image) {
-            alert("Ubaci sliku čarta.");
-            return;
-        }
+        if (!apiKey) { alert("Unesi Gemini API ključ."); return; }
+        if (!currentBase64Image) { alert("Ubaci sliku čarta."); return; }
 
         const outputCard = document.getElementById('outputCard');
         const analysisContent = document.getElementById('analysisContent');
 
         analyzeBtn.disabled = true;
-        analyzeBtn.innerText = "Izvršava se dubinska SMC analiza...";
+        analyzeBtn.innerText = "Sistem skenira bez milosti...";
         outputCard.style.display = 'block';
-        analysisContent.innerHTML = "<p style='color: #94a3b8;'>Model analizira likvidnost, HTF strukturu i imbalanse...</p>";
+        analysisContent.innerHTML = "<p style='color: #a1a1aa;'>Proveravam da li je setup stvarna prilika ili zamka...</p>";
 
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${apiKey}`;
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent?key=${apiKey}`;
 
         const promptText = `
-Ti si institucionalni risk menadžer i kvantitativni trejder specijalizovan za Smart Money Concepts (SMC) i ICT metodologiju.
-Tvoj zadatak je da napraviš ultra-preciznu, bezkompromisnu i objektivnu analizu priloženog čarta.
+Ti si brutalan, 1000% iskren institutional risk manager koji mrzil gubljenje novca i lažne signale. Tvoj jedini cilj je zaštita kapitala.
 
-AKSIOMI ANALIZE (BEZ ODSTUPANJA):
-1. Bilo kakva sumnja, ekspanzija bez prethodnog sweep-a likvidnosti ili izostanak jasne potvrdne svećice MORA rezultirati signalom "WAIT".
-2. Proveri sledeće elemente redom:
-   - Trend & HTF Context (Bullish/Bearish/Range)
-   - Liquidity Sweep (Da li je uzet BSL ili SSL pre ove reakcije?)
-   - Market Structure Shift (MSS) ili Break of Structure (BOS)
-   - Inefficiency / Fair Value Gap (FVG) ili Order Block (OB) koji služi kao Poi (Point of Interest).
-3. Ne izmišljaj cene – navodi precizne nivoe sa čarta ako su vidljivi na osi, ili opisuj tačne zone.
+PRAVILA BRUTALNE ISKRENOSTI:
+1. PODRAZUMEVANI SIGNAL JE "WAIT". Ako setup nije čista A+ konfluencija (jasno uzeta likvidnost, nepotvrđen FVG, konfuzan trend, loš R:R), TTVOJ SIGNAL MORA BITI "WAIT".
+2. Biti 1000% iskren znači: ako je čart mutan, ako nema jasne strukture, ako je market u sredini opsega (chop/range), DIREKTNO skreni pažnju na to i odbij ulaz.
+3. Nemoj izmišljati targete ni ulaze ako nisu savršeno vidljivi i utemeljeni na SMC/ICT konceptima.
 
-ODGOVORI ISKLJUČIVO U VAŽEĆEM JSON FORMATU BEZ MARKDOWN WRAPPERA ILI DODATNOG TEKSTA:
+OBAVEZAN VAŽEĆI JSON FORMAT (vrati SAMO čist JSON, bez markdowna):
 {
   "signal": "BUY" | "SELL" | "WAIT",
-  "confidence": "Visoka" | "Srednja" | "Niska",
-  "market_bias": "Bullish" | "Bearish" | "Neutralan / Range",
+  "setup_grade": "A+" | "B" | "C (Smeće / Rizik)",
+  "brutal_reality_check": "Kratka, direktna i brutalno iskrena ocena čarta u 1-2 rečenice.",
   "technical_setup": {
-    "structure": "Analiza BOS/MSS i trenutnog trenda",
-    "liquidity_sweep": "Detalji o uzetoj likvidnosti (BSL/SSL)",
-    "fvg_and_ob": "Analiza FVG neefikasnosti i Order Block zona"
+    "structure": "Iskren opis BOS/CHoCH stanja",
+    "liquidity": "Da li je stvarno uzet BSL/SSL ili nije?",
+    "fvg_or_ob": "Postoji li validan FVG/OB ili je izmišljen?"
   },
-  "execution_plan": {
-    "entry": "Precizna zona/cena ulaska",
-    "stop_loss": "Invalidacioni nivo (SL)",
-    "take_profit": "Ciljana likvidnost (TP)",
-    "risk_reward": "Procenjeni R:R odnos"
+  "trade_plan": {
+    "entry": "Precizna zona ili 'NEMA ULAZKA'",
+    "stop_loss": "Invalidacija ili 'NEMA'",
+    "take_profit": "Target ili 'NEMA'",
+    "risk_reward": "R:R odnos ili 'Nije primenjivo'"
   },
-  "reasoning": "Iskreno, kritičko obrazloženje odluke u 2-3 jasne rečenice. Ako je WAIT, objasni šta tačno nedostaje za ulazak."
+  "verdict_reasoning": "Detaljna i potpuno iskrena kritika razloga zašto ulaziti ili zašto NIKAKO ne ulaziti."
 }
 `;
 
@@ -309,9 +270,7 @@ ODGOVORI ISKLJUČIVO U VAŽEĆEM JSON FORMATU BEZ MARKDOWN WRAPPERA ILI DODATNOG
                 body: JSON.stringify(requestBody)
             });
 
-            if (!response.ok) {
-                throw new Error(`API Greška ${response.status}: ${response.statusText}`);
-            }
+            if (!response.ok) throw new Error(`API Greška ${response.status}`);
 
             const data = await response.json();
             const rawText = data.candidates[0].content.parts[0].text;
@@ -321,10 +280,10 @@ ODGOVORI ISKLJUČIVO U VAŽEĆEM JSON FORMATU BEZ MARKDOWN WRAPPERA ILI DODATNOG
 
         } catch (err) {
             console.error(err);
-            analysisContent.innerHTML = `<p style="color: #ef4444;">Greška: ${err.message}. Proveri valjanost API ključa i internet konekciju.</p>`;
+            analysisContent.innerHTML = `<p style="color: #ef4444;">Greška: ${err.message}. Proveri ključ i konekciju.</p>`;
         } finally {
             analyzeBtn.disabled = false;
-            analyzeBtn.innerText = "Analiziraj sa Gemini 1.5 Pro";
+            analyzeBtn.innerText = "Analiziraj Iskreno (Gemini 3.1 Flash Lite)";
         }
     }
 
@@ -332,18 +291,21 @@ ODGOVORI ISKLJUČIVO U VAŽEĆEM JSON FORMATU BEZ MARKDOWN WRAPPERA ILI DODATNOG
         const analysisContent = document.getElementById('analysisContent');
         analysisContent.innerHTML = `
             <div class="signal-badge ${data.signal}">
-                ${data.signal} — Pouzdanost: ${data.confidence} | Bias: ${data.market_bias}
+                ${data.signal} — Ocena Setup-a: ${data.setup_grade}
             </div>
-            <div class="data-row"><strong>Struktura (BOS/MSS):</strong> ${data.technical_setup.structure}</div>
-            <div class="data-row"><strong>Likvidnost (Sweep):</strong> ${data.technical_setup.liquidity_sweep}</div>
-            <div class="data-row"><strong>FVG & Order Block:</strong> ${data.technical_setup.fvg_and_ob}</div>
+            <div class="honest-box">
+                <strong>Brutalna Stvarnost:</strong> ${data.brutal_reality_check}
+            </div>
+            <div class="data-row"><strong>Struktura:</strong> ${data.technical_setup.structure}</div>
+            <div class="data-row"><strong>Likvidnost:</strong> ${data.technical_setup.liquidity}</div>
+            <div class="data-row"><strong>FVG / OB:</strong> ${data.technical_setup.fvg_or_ob}</div>
             <hr>
-            <div class="data-row"><strong>Entry (Ulaz):</strong> ${data.execution_plan.entry}</div>
-            <div class="data-row"><strong>Stop Loss:</strong> ${data.execution_plan.stop_loss}</div>
-            <div class="data-row"><strong>Take Profit:</strong> ${data.execution_plan.take_profit}</div>
-            <div class="data-row"><strong>Risk / Reward:</strong> ${data.execution_plan.risk_reward}</div>
+            <div class="data-row"><strong>Ulaz (Entry):</strong> ${data.trade_plan.entry}</div>
+            <div class="data-row"><strong>Stop Loss:</strong> ${data.trade_plan.stop_loss}</div>
+            <div class="data-row"><strong>Take Profit:</strong> ${data.trade_plan.take_profit}</div>
+            <div class="data-row"><strong>Risk / Reward:</strong> ${data.trade_plan.risk_reward}</div>
             <hr>
-            <div class="data-row"><strong>Iskreno Obrazloženje:</strong> ${data.reasoning}</div>
+            <div class="data-row"><strong>Konačna Presuda:</strong> ${data.verdict_reasoning}</div>
         `;
     }
 </script>
