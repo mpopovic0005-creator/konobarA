@@ -3,310 +3,118 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>1000% Honest Trading Analyzer</title>
+    <title>AI Trading Assistant</title>
     <style>
-        :root {
-            --bg-color: #090a0f;
-            --card-bg: #12151e;
-            --accent-color: #e11d48;
-            --text-color: #f3f4f6;
-            --border-color: #27272a;
-        }
-
-        body {
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 900px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .card {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 24px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
-        }
-
-        h1, h3 { margin-top: 0; color: #ffffff; }
-
-        .settings-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        input[type="password"] {
-            background: #050508;
-            border: 1px solid var(--border-color);
-            color: #fff;
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 14px;
-            width: 100%;
-            box-sizing: border-box;
-        }
-
-        .drop-zone {
-            border: 2px dashed #f43f5e;
-            border-radius: 12px;
-            padding: 40px 20px;
-            text-align: center;
-            cursor: pointer;
-            background: #050508;
-            transition: all 0.2s ease;
-        }
-
-        .drop-zone:hover, .drop-zone.dragover {
-            background: #1c1917;
-            border-color: #fb7185;
-        }
-
-        .preview-img {
-            max-width: 100%;
-            max-height: 450px;
-            border-radius: 8px;
-            margin-top: 15px;
-            display: none;
-            border: 1px solid var(--border-color);
-        }
-
-        button {
-            background-color: var(--accent-color);
-            color: white;
-            border: none;
-            padding: 14px 20px;
-            font-size: 16px;
-            font-weight: 700;
-            border-radius: 8px;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 15px;
-            transition: background 0.2s ease;
-        }
-
-        button:hover { background-color: #be123c; }
-        button:disabled { background-color: #3f3f46; cursor: not-allowed; }
-
-        .output-box { margin-top: 10px; display: none; }
-
-        .signal-badge {
-            font-size: 24px;
-            font-weight: 900;
-            padding: 16px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            text-align: center;
-            letter-spacing: 1.5px;
-        }
-
-        .BUY { background-color: rgba(34, 197, 94, 0.15); color: #22c55e; border: 2px solid #22c55e; }
-        .SELL { background-color: rgba(239, 68, 68, 0.15); color: #ef4444; border: 2px solid #ef4444; }
-        .WAIT { background-color: rgba(234, 179, 8, 0.15); color: #eab308; border: 2px solid #eab308; }
-
-        .data-row { margin-bottom: 12px; line-height: 1.6; }
-        .data-row strong { color: #fff; }
-        .honest-box {
-            background: #180d11;
-            border-left: 4px solid #f43f5e;
-            padding: 12px 16px;
-            margin: 15px 0;
-            border-radius: 4px;
-        }
-
-        hr { border: 0; height: 1px; background: var(--border-color); margin: 20px 0; }
+        body { font-family: Arial, sans-serif; padding: 20px; background: #121212; color: #fff; }
+        .container { max-width: 600px; margin: auto; background: #1e1e1e; padding: 20px; border-radius: 8px; }
+        input, button { margin-top: 15px; width: 100%; padding: 10px; box-sizing: border-box; }
+        button { background: #007bff; color: white; border: none; font-weight: bold; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        #rezultat { margin-top: 20px; white-space: pre-wrap; background: #2a2a2a; padding: 15px; border-radius: 5px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>1000% Honest AI Trading Analyzer</h1>
-
-    <div class="card">
-        <h3>Podešavanja</h3>
-        <div class="settings-group">
-            <label for="apiKey">Gemini API Key:</label>
-            <input type="password" id="apiKey" placeholder="Unesi svoj API ključ">
-        </div>
-    </div>
-
-    <div class="card">
-        <h3>Sličica Čarta</h3>
-        <div class="drop-zone" id="dropZone">
-            <p>Prevuci sliku čarta, nalepi (Ctrl+V) ili klikni za otvaranje</p>
-            <input type="file" id="fileInput" accept="image/*" style="display: none;">
-            <img id="previewImg" class="preview-img" alt="Čart Pregled">
-        </div>
-        <button id="analyzeBtn" onclick="runAnalysis()" disabled>Analiziraj Iskreno (Gemini 3.1 Flash Lite)</button>
-    </div>
-
-    <div class="card output-box" id="outputCard">
-        <h3>Brutalno Iskrena Analiza</h3>
-        <div id="analysisContent"></div>
-    </div>
+    <h2>AI Trading Chart Analizator</h2>
+    
+    <input type="file" id="imageInput" accept="image/*">
+    <button onclick="analizirajGrafikon()">Analiziraj Sliku i Daj Signal</button>
+    
+    <div id="loading" style="display:none; margin-top: 15px;">Analiza u toku...</div>
+    <div id="rezultat"></div>
 </div>
 
 <script>
-    let currentBase64Image = null;
+    // 1. ZAMENI "TVOJ_GEMINI_API_KEY" SA TVOJIM STVARNIM GEMINI API KLJUČEM
+    const API_KEY = "TVOJ_GEMINI_API_KEY";
 
-    const dropZone = document.getElementById('dropZone');
-    const fileInput = document.getElementById('fileInput');
-    const previewImg = document.getElementById('previewImg');
-    const analyzeBtn = document.getElementById('analyzeBtn');
+    // 2. Sistemski prompt koji eliminiše "WAIT" odgovore
+    const SYSTEM_INSTRUCTION = `
+Ti si stručni analitičar tehničke analize (SMC / Price Action).
+Tvoj zadatak je da na osnovu priložene slike grafikona ODMAH proceniš najbolju verovatnoću i pružiš konkretan signal.
 
-    dropZone.addEventListener('click', () => fileInput.click());
-    dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
-    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
-    dropZone.addEventListener('drop', (e) => {
-        e.preventDefault();
-        dropZone.classList.remove('dragover');
-        if (e.dataTransfer.files.length > 0) handleFile(e.dataTransfer.files[0]);
-    });
+Pravila:
+1. Nikada nemoj odbiti davanje signala niti pisati "WAIT" ili "NEMA ULAZKA".
+2. Na osnovu vidljive strukture (BOS/CHoCH), Fair Value Gaps (FVG) i likvidnosti, izaberi najverovatniji smer: BUY ili SELL.
+3. Ako je tržište u konsolidaciji, odredi smer na osnovu bližeg sweep-a likvidnosti ili trenutnog momenta.
+4. Tvoj odgovor MORA pratiti sledeći format:
+   - ODLUKA: [BUY ili SELL]
+   - RAZLOG: [Objašnjenje u 2-3 rečenice šta vidiš na slici - BOS, FVG, Liquidity sweep]
+   - ENTRY: [Okvirni nivo za ulaz na osnovu slike]
+   - STOP LOSS: [Nivo iznad/ispod ključnog high/low]
+   - TAKE PROFIT: [Nivo sledeće likvidnosti ili FVG-a]
 
-    fileInput.addEventListener('change', (e) => {
-        if (e.target.files.length > 0) handleFile(e.target.files[0]);
-    });
-
-    document.addEventListener('paste', (e) => {
-        const items = (e.clipboardData || e.originalEvent.clipboardData).items;
-        for (let item of items) {
-            if (item.kind === 'file' && item.type.startsWith('image/')) {
-                handleFile(item.getAsFile());
-                break;
-            }
-        }
-    });
-
-    function handleFile(file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            currentBase64Image = e.target.result;
-            previewImg.src = currentBase64Image;
-            previewImg.style.display = 'block';
-            analyzeBtn.disabled = false;
-        };
-        reader.readAsDataURL(file);
-    }
-
-    async function runAnalysis() {
-        const apiKey = document.getElementById('apiKey').value.trim();
-        if (!apiKey) { alert("Unesi Gemini API ključ."); return; }
-        if (!currentBase64Image) { alert("Ubaci sliku čarta."); return; }
-
-        const outputCard = document.getElementById('outputCard');
-        const analysisContent = document.getElementById('analysisContent');
-
-        analyzeBtn.disabled = true;
-        analyzeBtn.innerText = "Sistem skenira bez milosti...";
-        outputCard.style.display = 'block';
-        analysisContent.innerHTML = "<p style='color: #a1a1aa;'>Proveravam da li je setup stvarna prilika ili zamka...</p>";
-
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent?key=${apiKey}`;
-
-        const promptText = `
-Ti si brutalan, 1000% iskren institutional risk manager koji mrzil gubljenje novca i lažne signale. Tvoj jedini cilj je zaštita kapitala.
-
-PRAVILA BRUTALNE ISKRENOSTI:
-1. PODRAZUMEVANI SIGNAL JE "WAIT". Ako setup nije čista A+ konfluencija (jasno uzeta likvidnost, nepotvrđen FVG, konfuzan trend, loš R:R), TTVOJ SIGNAL MORA BITI "WAIT".
-2. Biti 1000% iskren znači: ako je čart mutan, ako nema jasne strukture, ako je market u sredini opsega (chop/range), DIREKTNO skreni pažnju na to i odbij ulaz.
-3. Nemoj izmišljati targete ni ulaze ako nisu savršeno vidljivi i utemeljeni na SMC/ICT konceptima.
-
-OBAVEZAN VAŽEĆI JSON FORMAT (vrati SAMO čist JSON, bez markdowna):
-{
-  "signal": "BUY" | "SELL" | "WAIT",
-  "setup_grade": "A+" | "B" | "C (Smeće / Rizik)",
-  "brutal_reality_check": "Kratka, direktna i brutalno iskrena ocena čarta u 1-2 rečenice.",
-  "technical_setup": {
-    "structure": "Iskren opis BOS/CHoCH stanja",
-    "liquidity": "Da li je stvarno uzet BSL/SSL ili nije?",
-    "fvg_or_ob": "Postoji li validan FVG/OB ili je izmišljen?"
-  },
-  "trade_plan": {
-    "entry": "Precizna zona ili 'NEMA ULAZKA'",
-    "stop_loss": "Invalidacija ili 'NEMA'",
-    "take_profit": "Target ili 'NEMA'",
-    "risk_reward": "R:R odnos ili 'Nije primenjivo'"
-  },
-  "verdict_reasoning": "Detaljna i potpuno iskrena kritika razloga zašto ulaziti ili zašto NIKAKO ne ulaziti."
-}
+Budi direktan, presudan i daj konkretne parametre bez izgovora.
 `;
 
-        const requestBody = {
-            contents: [
-                {
-                    parts: [
-                        { text: promptText },
-                        {
-                            inline_data: {
-                                mime_type: "image/png",
-                                data: currentBase64Image.split(",")[1]
-                            }
+    async function analizirajGrafikon() {
+        const fileInput = document.getElementById('imageInput');
+        const resultDiv = document.getElementById('rezultat');
+        const loadingDiv = document.getElementById('loading');
+
+        if (!fileInput.files[0]) {
+            alert('Molimo izaberi sliku grafikona!');
+            return;
+        }
+
+        loadingDiv.style.display = 'block';
+        resultDiv.innerText = '';
+
+        const file = fileInput.files[0];
+        const base64Image = await convertBase64(file);
+        const base64Data = base64Image.split(',')[1];
+
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`;
+
+        const payload = {
+            system_instruction: {
+                parts: [{ text: SYSTEM_INSTRUCTION }]
+            },
+            contents: [{
+                parts: [
+                    { text: "Analiziraj ovaj chart i daj mi konkretan trade signal." },
+                    {
+                        inline_data: {
+                            mime_type: file.type,
+                            data: base64Data
                         }
-                    ]
-                }
-            ],
+                    }
+                ]
+            }],
             generationConfig: {
-                temperature: 0,
-                topP: 1,
-                responseMimeType: "application/json"
+                temperature: 0.2
             }
         };
 
         try {
             const response = await fetch(url, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(requestBody)
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
             });
 
-            if (!response.ok) throw new Error(`API Greška ${response.status}`);
-
             const data = await response.json();
-            const rawText = data.candidates[0].content.parts[0].text;
-            const res = JSON.parse(rawText);
+            loadingDiv.style.display = 'none';
 
-            renderOutput(res);
-
-        } catch (err) {
-            console.error(err);
-            analysisContent.innerHTML = `<p style="color: #ef4444;">Greška: ${err.message}. Proveri ključ i konekciju.</p>`;
-        } finally {
-            analyzeBtn.disabled = false;
-            analyzeBtn.innerText = "Analiziraj Iskreno (Gemini 3.1 Flash Lite)";
+            if (data.candidates && data.candidates[0].content.parts[0].text) {
+                resultDiv.innerText = data.candidates[0].content.parts[0].text;
+            } else {
+                resultDiv.innerText = "Greška u odgovoru API-ja: " + JSON.stringify(data);
+            }
+        } catch (error) {
+            loadingDiv.style.display = 'none';
+            resultDiv.innerText = "Greška prilikom slanja zahteva: " + error.message;
         }
     }
 
-    function renderOutput(data) {
-        const analysisContent = document.getElementById('analysisContent');
-        analysisContent.innerHTML = `
-            <div class="signal-badge ${data.signal}">
-                ${data.signal} — Ocena Setup-a: ${data.setup_grade}
-            </div>
-            <div class="honest-box">
-                <strong>Brutalna Stvarnost:</strong> ${data.brutal_reality_check}
-            </div>
-            <div class="data-row"><strong>Struktura:</strong> ${data.technical_setup.structure}</div>
-            <div class="data-row"><strong>Likvidnost:</strong> ${data.technical_setup.liquidity}</div>
-            <div class="data-row"><strong>FVG / OB:</strong> ${data.technical_setup.fvg_or_ob}</div>
-            <hr>
-            <div class="data-row"><strong>Ulaz (Entry):</strong> ${data.trade_plan.entry}</div>
-            <div class="data-row"><strong>Stop Loss:</strong> ${data.trade_plan.stop_loss}</div>
-            <div class="data-row"><strong>Take Profit:</strong> ${data.trade_plan.take_profit}</div>
-            <div class="data-row"><strong>Risk / Reward:</strong> ${data.trade_plan.risk_reward}</div>
-            <hr>
-            <div class="data-row"><strong>Konačna Presuda:</strong> ${data.verdict_reasoning}</div>
-        `;
+    function convertBase64(file) {
+        return new Promise((resolve, reject) => {
+            const fileReader = new FileReader();
+            fileReader.readAsDataURL(file);
+            fileReader.onload = () => resolve(fileReader.result);
+            fileReader.onerror = (error) => reject(error);
+        });
     }
 </script>
 
