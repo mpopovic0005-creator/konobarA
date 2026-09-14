@@ -3,138 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Trading Assistant</title>
+    <title>Trading Bot - FVG, POC, Supply/Demand</title>
     <style>
-        body { font-family: Arial, sans-serif; padding: 20px; background: #121212; color: #fff; }
-        .container { max-width: 600px; margin: auto; background: #1e1e1e; padding: 20px; border-radius: 8px; }
-        input, button { margin-top: 12px; width: 100%; padding: 12px; box-sizing: border-box; border-radius: 5px; border: 1px solid #333; background: #2a2a2a; color: #fff; }
-        button { background: #007bff; color: white; border: none; font-weight: bold; cursor: pointer; margin-top: 18px; }
-        button:hover { background: #0056b3; }
-        #rezultat { margin-top: 20px; white-space: pre-wrap; background: #2a2a2a; padding: 15px; border-radius: 5px; line-height: 1.5; }
-        label { font-size: 14px; color: #aaa; margin-top: 10px; display: block; }
+        body { font-family: Arial, sans-serif; background-color: #121212; color: #e0e0e0; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; background: #1e1e1e; padding: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        h2 { color: #f39c12; text-align: center; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; color: #b0b0b0; }
+        input, select { width: 100%; padding: 8px; box-sizing: border-box; background: #2c2c2c; border: 1px solid #444; color: #fff; border-radius: 4px; }
+        button { background: #f39c12; color: #121212; border: none; padding: 10px 15px; width: 100%; font-size: 16px; font-weight: bold; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #e67e22; }
+        .result { margin-top: 20px; padding: 15px; border-radius: 4px; text-align: center; font-size: 18px; font-weight: bold; }
+        .buy { background: #27ae60; color: white; }
+        .sell { background: #c0392b; color: white; }
+        .wait { background: #7f8c8d; color: white; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>AI Trading Chart Analizator</h2>
+    <h2>Trading Signal Bot</h2>
     
-    <label for="apiKeyInput">Tvoj Gemini API Ključ:</label>
-    <input type="password" id="apiKeyInput" placeholder="Nalepi AIzaSy... ključ ovde">
+    <div class="form-group">
+        <label for="currentPrice">Trenutna Cena (npr. XAUUSD):</label>
+        <input type="number" id="currentPrice" step="0.01" placeholder="Unesi cenu">
+    </div>
 
-    <label for="imageInput">Slika grafikona:</label>
-    <input type="file" id="imageInput" accept="image/*">
-    
-    <button onclick="analizirajGrafikon()">Analiziraj Sliku i Daj Signal</button>
-    
-    <div id="loading" style="display:none; margin-top: 15px; color: #ffca28;">Analiza u toku...</div>
-    <div id="rezultat"></div>
+    <div class="form-group">
+        <label for="zoneType">Gde se cena trenutno nalazi?</label>
+        <select id="zoneType">
+            <option value="none">Izvan zona</option>
+            <option value="demand">U Demand zoni (Zona kupovine)</option>
+            <option value="supply">U Supply zoni (Zona prodaje)</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>
+            <input type="checkbox" id="hasFVG"> Postoji li nezatvoreni FVG u blizini?
+        </label>
+    </div>
+
+    <div class="form-group">
+        <label>
+            <input type="checkbox" id="hasPOC"> Je li POC (Point of Control) blizu ulaza?
+        </label>
+    </div>
+
+    <button onclick="checkSignal()">Proveri Signal</button>
+
+    <div id="resultBox" class="result wait" style="display:none;">Čeka se analiza...</div>
+</div>
+
+<div style="text-align: center; margin-top: 20px; color: #777; font-size: 12px;">
+    Lokalni alat za testiranje strategije
 </div>
 
 <script>
-    // Automatsko učitavanje zapamćenog ključa ako postoji
-    document.addEventListener("DOMContentLoaded", () => {
-        const savedKey = localStorage.getItem("gemini_api_key");
-        if (savedKey) {
-            document.getElementById('apiKeyInput').value = savedKey;
-        }
-    });
+    function checkSignal() {
+        const price = parseFloat(document.getElementById('currentPrice').value);
+        const zone = document.getElementById('zoneType').value;
+        const hasFVG = document.getElementById('hasFVG').checked;
+        const hasPOC = document.getElementById('hasPOC').checked;
+        const resultBox = document.getElementById('resultBox');
 
-    const SYSTEM_INSTRUCTION = `
-Ti si stručni analitičar tehničke analize (SMC / Price Action).
-Tvoj zadatak je da na osnovu priložene slike grafikona ODMAH proceniš najbolju verovatnoću i pružiš konkretan signal.
+        resultBox.style.display = 'block';
 
-Pravila:
-1. Nikada nemoj odbiti davanje signala niti pisati "WAIT" ili "NEMA ULAZKA".
-2. Na osnovu vidljive strukture (BOS/CHoCH), Fair Value Gaps (FVG) i likvidnosti, izaberi najverovatniji smer: BUY ili SELL.
-3. Ako je tržište u konsolidaciji, odredi smer na osnovu bližeg sweep-a likvidnosti ili trenutnog momenta.
-4. Tvoj odgovor MORA pratiti sledeći format:
-   - ODLUKA: [BUY ili SELL]
-   - RAZLOG: [Objašnjenje u 2-3 rečenice šta vidiš na slici - BOS, FVG, Liquidity sweep]
-   - ENTRY: [Okvirni nivo za ulaz na osnovu slike]
-   - STOP LOSS: [Nivo iznad/ispod ključnog high/low]
-   - TAKE PROFIT: [Nivo sledeće likvidnosti ili FVG-a]
-
-Budi direktan, presudan i daj konkretne parametre bez izgovora.
-`;
-
-    async function analizirajGrafikon() {
-        const apiKey = document.getElementById('apiKeyInput').value.trim();
-        const fileInput = document.getElementById('imageInput');
-        const resultDiv = document.getElementById('rezultat');
-        const loadingDiv = document.getElementById('loading');
-
-        if (!apiKey) {
-            alert('Molimo unesi Gemini API ključ!');
+        if (isNaN(price)) {
+            resultBox.className = 'result wait';
+            resultBox.innerHTML = 'Molimo unesite trenutnu cenu!';
             return;
         }
 
-        if (!fileInput.files[0]) {
-            alert('Molimo izaberi sliku grafikona!');
-            return;
+        // Osnovna logika strategije za konfluenciju
+        if (zone === 'demand' && hasFVG && hasPOC) {
+            resultBox.className = 'result buy';
+            resultBox.innerHTML = '🚀 SIGNAL: BUY (Sve konfluencije ispunjene u Demand zoni!)';
+        } else if (zone === 'supply' && hasFVG && hasPOC) {
+            resultBox.className = 'result sell';
+            resultBox.innerHTML = '🔻 SIGNAL: SELL (Sve konfluencije ispunjene u Supply zoni!)';
+        } else {
+            resultBox.className = 'result wait';
+            resultBox.innerHTML = '⏳ ČEKAJ: Nema čiste konfluencije (Fale zone, FVG ili POC).';
         }
-
-        // Sačuvaj ključ u lokalnoj memoriji pregledača za sledeći put
-        localStorage.setItem("gemini_api_key", apiKey);
-
-        loadingDiv.style.display = 'block';
-        resultDiv.innerText = '';
-
-        const file = fileInput.files[0];
-        const base64Image = await convertBase64(file);
-        const base64Data = base64Image.split(',')[1];
-
-        // Model postavljen na gemini-3.1-flash-lite-preview
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent?key=${apiKey}`;
-
-        const payload = {
-            system_instruction: {
-                parts: [{ text: SYSTEM_INSTRUCTION }]
-            },
-            contents: [{
-                parts: [
-                    { text: "Analiziraj ovaj chart i daj mi konkretan trade signal." },
-                    {
-                        inline_data: {
-                            mime_type: file.type,
-                            data: base64Data
-                        }
-                    }
-                ]
-            }],
-            generationConfig: {
-                temperature: 0.2
-            }
-        };
-
-        try {
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-
-            const data = await response.json();
-            loadingDiv.style.display = 'none';
-
-            if (data.candidates && data.candidates[0].content.parts[0].text) {
-                resultDiv.innerText = data.candidates[0].content.parts[0].text;
-            } else {
-                resultDiv.innerText = "Greška u odgovoru API-ja: " + JSON.stringify(data, null, 2);
-            }
-        } catch (error) {
-            loadingDiv.style.display = 'none';
-            resultDiv.innerText = "Greška prilikom slanja zahteva: " + error.message;
-        }
-    }
-
-    function convertBase64(file) {
-        return new Promise((resolve, reject) => {
-            const fileReader = new FileReader();
-            fileReader.readAsDataURL(file);
-            fileReader.onload = () => resolve(fileReader.result);
-            fileReader.onerror = (error) => reject(error);
-        });
     }
 </script>
 
