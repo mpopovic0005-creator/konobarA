@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XAUUSD Liquidity & FVG Evaluator</title>
+    <title>Moj Trading Journal & Journey</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -11,159 +11,217 @@
         .mono { font-family: 'JetBrains Mono', monospace; }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col items-center p-4 md:p-8">
+<body class="bg-slate-950 text-slate-100 min-h-screen p-4 md:p-8">
 
-    <div class="w-full max-w-4xl bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden">
+    <div class="max-w-6xl mx-auto space-y-6">
         <!-- Header -->
-        <div class="bg-slate-900/80 border-b border-slate-800 p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-2xl">
             <div>
-                <span class="text-xs mono uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">AI Prop Trading Engine</span>
-                <h1 class="text-2xl font-bold mt-2 text-white">XAUUSD Strategy Evaluator</h1>
-                <p class="text-slate-400 text-sm">Liquidity Sweeps & FVG Rigorous Analysis (100% Strict Mode)</p>
+                <span class="text-xs mono uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">Trading Journey & Journal</span>
+                <h1 class="text-2xl font-bold mt-2 text-white">XAUUSD Prop Journal</h1>
+                <p class="text-slate-400 text-sm">Praćenje Liquidity Sweep & FVG strategije, pluseva i minusa</p>
             </div>
-            <div class="flex items-center gap-2">
-                <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span class="text-xs text-slate-300 mono">Sistem spreman</span>
+            <!-- Statistika -->
+            <div class="grid grid-cols-3 gap-3 w-full md:w-auto">
+                <div class="bg-slate-950 border border-slate-800 px-4 py-2.5 rounded-xl text-center">
+                    <span class="block text-xs text-slate-500 uppercase mono">Ukupno</span>
+                    <span id="statTotal" class="text-lg font-bold mono text-slate-200">0</span>
+                </div>
+                <div class="bg-slate-950 border border-slate-800 px-4 py-2.5 rounded-xl text-center">
+                    <span class="block text-xs text-emerald-500 uppercase mono">Winrate</span>
+                    <span id="statWinrate" class="text-lg font-bold mono text-emerald-400">0%</span>
+                </div>
+                <div class="bg-slate-950 border border-slate-800 px-4 py-2.5 rounded-xl text-center">
+                    <span class="block text-xs text-slate-500 uppercase mono">Profit / Loss</span>
+                    <span id="statNet" class="text-lg font-bold mono text-slate-200">0 €</span>
+                </div>
             </div>
         </div>
 
-        <!-- Main Content -->
-        <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Upload Panel -->
-            <div class="space-y-4">
-                <label class="block text-sm font-semibold text-slate-300 uppercase tracking-wide">1. Izaberi Timeframe</label>
-                <select id="timeframeSelect" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-slate-200 mono focus:outline-none focus:border-emerald-500">
-                    <optgroup label="Minutni (Scalping)">
-                        <option value="M1">M1 (1 minut)</option>
-                        <option value="M5" selected>M5 (5 minuta - Primarni)</option>
-                        <option value="M15">M15 (15 minuta)</option>
-                        <option value="M30">M30 (30 minuta)</option>
-                    </optgroup>
-                    <optgroup label="Satni (Intraday)">
-                        <option value="H1">H1 (1 sat)</option>
-                        <option value="H4">H4 (4 sata)</option>
-                    </optgroup>
-                    <optgroup label="Viši okviri (Swing)">
-                        <option value="D1">D1 (Dnevni)</option>
-                        <option value="W1">W1 (Nedeljni)</option>
-                        <option value="MN">MN (Mesečni)</option>
-                    </optgroup>
-                </select>
-
-                <label class="block text-sm font-semibold text-slate-300 uppercase tracking-wide mt-4">2. Otpremi Skrinšot Čarta</label>
-                <div id="dropZone" class="border-2 border-dashed border-slate-700 hover:border-emerald-500/50 rounded-xl p-8 text-center cursor-pointer bg-slate-950/50 transition flex flex-col items-center justify-center min-h-[220px]">
-                    <input type="file" id="fileInput" accept="image/*" class="hidden">
-                    <div id="uploadPrompt" class="space-y-2">
-                        <svg class="w-12 h-12 mx-auto text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
-                        <p class="text-sm text-slate-300 font-medium">Prevucite sliku ovde ili <span class="text-emerald-400 underline">izaberite fajl</span></p>
-                        <p class="text-xs text-slate-500">PNG, JPG, WEBP (podržava sve TradingView formate)</p>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Forma za unos trejda -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4 shadow-xl">
+                <h2 class="text-base font-bold text-white uppercase tracking-wide border-b border-slate-800 pb-3">Novi Unos Trejda</h2>
+                
+                <form id="tradeForm" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wide mb-1">Timeframe</label>
+                        <select id="tfInput" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-slate-200 mono text-sm focus:outline-none focus:border-emerald-500">
+                            <option value="M5" selected>M5 (Primarni)</option>
+                            <option value="M1">M1</option>
+                            <option value="M15">M15</option>
+                            <option value="M30">M30</option>
+                            <option value="H1">H1</option>
+                            <option value="H4">H4</option>
+                            <option value="D1">D1</option>
+                        </select>
                     </div>
-                    <img id="previewImage" class="hidden max-h-48 rounded-lg object-contain border border-slate-700 shadow-md">
-                </div>
 
-                <button id="analyzeBtn" class="w-full bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold py-3.5 px-4 rounded-xl transition duration-200 shadow-lg shadow-emerald-900/20 disabled:opacity-50 disabled:cursor-not-allowed">
-                    Pokreni Rigoroznu Procenu Trejda
-                </button>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wide mb-1">Ishod</label>
+                            <select id="resultInput" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-slate-200 mono text-sm focus:outline-none focus:border-emerald-500">
+                                <option value="WIN">PLUS (WIN)</option>
+                                <option value="LOSS">MINUS (LOSS)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wide mb-1">P/L (u € ili $)</label>
+                            <input type="number" id="plInput" step="0.01" placeholder="npr. 150 ili -50" required class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-slate-200 mono text-sm focus:outline-none focus:border-emerald-500">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wide mb-1">Skrinšot Čarta (Grafikon)</label>
+                        <input type="file" id="imageInput" accept="image/*" class="w-full text-xs text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-emerald-600 file:text-slate-950 hover:file:bg-emerald-500 cursor-pointer">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wide mb-1">Zabeleška / Razlog / FVG Setup</label>
+                        <textarea id="notesInput" rows="3" placeholder="npr. Čist liquidity sweep iznad azijskog visokog, usledio FVG i ulaz na M5..." class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-slate-200 text-xs focus:outline-none focus:border-emerald-500"></textarea>
+                    </div>
+
+                    <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold py-3 px-4 rounded-xl transition duration-200 shadow-lg shadow-emerald-900/20 text-sm">
+                        Sačuvaj Trejd u Dnevnik
+                    </button>
+                </form>
             </div>
 
-            <!-- Result Panel -->
-            <div class="bg-slate-950 border border-slate-800 rounded-xl p-5 flex flex-col justify-between">
+            <!-- Istorija trejdova -->
+            <div class="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4 shadow-xl flex flex-col justify-between">
                 <div>
-                    <div class="flex justify-between items-center border-b border-slate-800 pb-3 mb-4">
-                        <h2 class="text-sm font-bold uppercase tracking-wider text-slate-400 mono">Rezultat Procene</h2>
-                        <span id="scoreBadge" class="mono text-lg font-bold px-3 py-1 rounded-lg bg-slate-800 text-slate-400">-- / 10</span>
+                    <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                        <h2 class="text-base font-bold text-white uppercase tracking-wide">Tvoja Istorija Trejdova (Trading Journey)</h2>
+                        <button id="clearBtn" class="text-xs text-rose-400 hover:underline">Obriši sve</button>
                     </div>
 
-                    <div id="resultContent" class="space-y-4 text-sm text-slate-300">
-                        <p class="text-slate-500 italic text-center py-12">Otpremite skrinšot i izaberite timeframe da bi sistem dao detaljnu analizu...</p>
+                    <div id="tradesList" class="space-y-3 mt-4 max-h-[500px] overflow-y-auto pr-2">
+                        <p class="text-slate-500 text-xs text-center py-16 italic">Još uvek nema sačuvanih trejdova. Unesi svoj prvi trejd sa leve strane!</p>
                     </div>
                 </div>
 
-                <div class="border-t border-slate-800 pt-3 mt-4 text-xs text-slate-500 flex justify-between">
-                    <span>Model: FVG & Liquidity Engine</span>
-                    <span id="selectedTfDisplay" class="mono text-emerald-400">TF: M5</span>
+                <div class="border-t border-slate-800 pt-3 text-xs text-slate-500 text-right mono">
+                    Sistem lokalno čuva podatke na tvom uređaju
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        const dropZone = document.getElementById('dropZone');
-        const fileInput = document.getElementById('fileInput');
-        const previewImage = document.getElementById('previewImage');
-        const uploadPrompt = document.getElementById('uploadPrompt');
-        const analyzeBtn = document.getElementById('analyzeBtn');
-        const timeframeSelect = document.getElementById('timeframeSelect');
-        const selectedTfDisplay = document.getElementById('selectedTfDisplay');
-        const scoreBadge = document.getElementById('scoreBadge');
-        const resultContent = document.getElementById('resultContent');
+        let trades = JSON.parse(localStorage.getItem('trading_journey')) || [];
 
-        let currentImageBase64 = null;
+        const tradeForm = document.getElementById('tradeForm');
+        const tfInput = document.getElementById('tfInput');
+        const resultInput = document.getElementById('resultInput');
+        const plInput = document.getElementById('plInput');
+        const imageInput = document.getElementById('imageInput');
+        const notesInput = document.getElementById('notesInput');
+        const tradesList = document.getElementById('tradesList');
+        
+        const statTotal = document.getElementById('statTotal');
+        const statWinrate = document.getElementById('statWinrate');
+        const statNet = document.getElementById('statNet');
+        const clearBtn = document.getElementById('clearBtn');
 
-        timeframeSelect.addEventListener('change', (e) => {
-            selectedTfDisplay.textContent = `TF: ${e.target.value}`;
-        });
-
-        dropZone.addEventListener('click', () => fileInput.click());
-        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('border-emerald-500'); });
-        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('border-emerald-500'));
-        dropZone.addEventListener('drop', (e) => {
+        tradeForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            dropZone.classList.remove('border-emerald-500');
-            if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
-        });
-        fileInput.addEventListener('change', (e) => {
-            if (e.target.files.length) handleFile(e.target.files[0]);
+            const file = imageInput.files[0];
+            
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(uploadEvent) {
+                    saveTrade(uploadEvent.target.result);
+                };
+                reader.readAsDataURL(file);
+            } else {
+                saveTrade(null);
+            }
         });
 
-        function handleFile(file) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                currentImageBase64 = e.target.result;
-                previewImage.src = currentImageBase64;
-                previewImage.classList.remove('hidden');
-                uploadPrompt.classList.add('hidden');
+        function saveTrade(imgData) {
+            const newTrade = {
+                id: Date.now(),
+                date: new Date().toLocaleDateString('sr-RS', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+                tf: tfInput.value,
+                result: resultInput.value,
+                pl: parseFloat(plInput.value),
+                image: imgData,
+                notes: notesInput.value
             };
-            reader.readAsDataURL(file);
+
+            trades.unshift(newTrade);
+            localStorage.setItem('trading_journey', JSON.stringify(trades));
+            tradeForm.reset();
+            renderTrades();
         }
 
-        analyzeBtn.addEventListener('click', () => {
-            if (!currentImageBase64) {
-                alert('Molimo Vas da priložite sliku čarta!');
+        clearBtn.addEventListener('click', () => {
+            if (confirm('Da li si siguran da želiš da obrišeš celu istoriju dnevnika?')) {
+                trades = [];
+                localStorage.removeItem('trading_journey');
+                renderTrades();
+            }
+        });
+
+        function renderTrades() {
+            if (trades.length === 0) {
+                tradesList.innerHTML = '<p class="text-slate-500 text-xs text-center py-16 italic">Još uvek nema sačuvanih trejdova. Unesi svoj prvi trejd sa leve strane!</p>';
+                statTotal.textContent = '0';
+                statWinrate.textContent = '0%';
+                statNet.textContent = '0 €';
+                statNet.className = "text-lg font-bold mono text-slate-200";
                 return;
             }
 
-            resultContent.innerHTML = '<div class="flex justify-center items-center py-16"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500"></div><span class="ml-3 text-slate-400">Analiziram strukturu i zone...</span></div>';
-            scoreBadge.className = "mono text-lg font-bold px-3 py-1 rounded-lg bg-slate-800 text-slate-400";
-            scoreBadge.textContent = "...";
+            let wins = 0;
+            let netPL = 0;
+            let html = '';
 
-            setTimeout(() => {
-                // Primer simulacije stroge AI procene zasnovane na tvojim pravilima
-                const score = (Math.random() * 2 + 8).toFixed(1); // Ocena između 8.0 i 10.0
-                scoreBadge.className = "mono text-lg font-bold px-3 py-1 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
-                scoreBadge.textContent = `${score} / 10`;
+            trades.forEach(t => {
+                if (t.result === 'WIN') wins++;
+                netPL += t.pl;
 
-                resultContent.innerHTML = `
-                    <div class="space-y-3">
-                        <div class="p-3 bg-emerald-950/30 border border-emerald-500/20 rounded-lg">
-                            <span class="text-xs font-bold text-emerald-400 uppercase tracking-wide">Status: Validno Postavljenje</span>
-                            <p class="text-xs text-slate-300 mt-1">Liquidity sweep i FVG zona na izabranom timeframe-u (${timeframeSelect.value}) su jasno usklađeni.</p>
+                const isWin = t.result === 'WIN';
+                const badgeClass = isWin ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-rose-500/20 text-rose-400 border-rose-500/30';
+                const plColor = t.pl >= 0 ? 'text-emerald-400' : 'text-rose-400';
+
+                html += `
+                    <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
+                        <div class="flex items-start gap-3">
+                            ${t.image ? `<img src="${t.image}" class="w-16 h-16 object-cover rounded-lg border border-slate-700 cursor-pointer" onclick="window.open(this.src)">` : '<div class="w-16 h-16 bg-slate-900 rounded-lg border border-slate-800 flex items-center justify-center text-[10px] text-slate-600">Nema slike</div>'}
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs font-bold px-2 py-0.5 rounded border mono ${badgeClass}">${t.result}</span>
+                                    <span class="text-xs mono text-slate-400">TF: ${t.tf}</span>
+                                    <span class="text-xs text-slate-500">${t.date}</span>
+                                </div>
+                                <p class="text-xs text-slate-300 mt-1.5">${t.notes || 'Bez beleške'}</p>
+                            </div>
                         </div>
-                        <div>
-                            <h4 class="text-xs font-bold text-slate-400 uppercase">Detalji Analize:</h4>
-                            <ul class="list-disc list-inside text-xs space-y-1 mt-1 text-slate-300">
-                                <li>Jasno prepoznata likvidnost (sweep) pre impulsnog kretanja.</li>
-                                <li>FVG zona je precizno definisana i ostavljena snažnim svećama.</li>
-                                <li>Struktura u potpunosti odgovara pravilima institucionalnog modela.</li>
-                            </ul>
-                        </div>
-                        <div class="p-2.5 bg-slate-900 border border-slate-800 rounded-lg text-xs text-slate-400">
-                            <strong>Savet:</strong> Sačekaj retest FVG zone pre otvaranja pozicije i obavezno postavi stop loss ispod sweep nivoa.
+                        <div class="text-right w-full md:w-auto flex md:flex-col justify-between items-center md:items-end">
+                            <span class="text-sm font-bold mono ${plColor}">${t.pl > 0 ? '+' + t.pl : t.pl} €</span>
+                            <button onclick="deleteTrade(${t.id})" class="text-[10px] text-rose-500 hover:underline mt-1">Obriši</button>
                         </div>
                     </div>
                 `;
-            }, 1200);
-        });
+            });
+
+            tradesList.innerHTML = html;
+
+            const winrate = ((wins / trades.length) * 100).toFixed(1);
+            statTotal.textContent = trades.length;
+            statWinrate.textContent = winrate + '%';
+            statNet.textContent = (netPL >= 0 ? '+' + netPL.toFixed(2) : netPL.toFixed(2)) + ' €';
+            statNet.className = `text-lg font-bold mono ${netPL >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+        }
+
+        window.deleteTrade = function(id) {
+            trades = trades.filter(t => t.id !== id);
+            localStorage.setItem('trading_journey', JSON.stringify(trades));
+            renderTrades();
+        }
+
+        renderTrades();
     </script>
 </body>
 </html>
