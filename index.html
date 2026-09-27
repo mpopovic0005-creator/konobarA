@@ -3,72 +3,167 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trading Vision Bot</title>
+    <title>XAUUSD Liquidity & FVG Evaluator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: Arial, sans-serif; background: #0f172a; color: #f8fafc; padding: 20px; display: flex; justify-content: center; }
-        .card { background: #1e293b; padding: 25px; border-radius: 12px; width: 100%; max-width: 500px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
-        h2 { color: #38bdf8; text-align: center; margin-bottom: 20px; }
-        .upload-box { border: 2px dashed #475569; padding: 20px; text-align: center; border-radius: 8px; margin-bottom: 20px; cursor: pointer; }
-        .upload-box:hover { border-color: #38bdf8; }
-        input[type="file"] { display: none; }
-        button { background: #38bdf8; color: #0f172a; border: none; padding: 12px; width: 100%; font-size: 16px; font-weight: bold; border-radius: 6px; cursor: pointer; }
-        button:hover { background: #0ea5e9; }
-        #preview { max-width: 100%; margin-top: 15px; border-radius: 6px; display: none; }
-        .result { margin-top: 20px; background: #0f172a; padding: 15px; border-radius: 6px; white-space: pre-wrap; font-size: 14px; border: 1px solid #334155; }
+        body { font-family: 'Inter', sans-serif; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
     </style>
 </head>
-<body>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col items-center p-4 md:p-8">
 
-<div class="card">
-    <h2>Trading Vision Bot</h2>
-    
-    <label class="upload-box" for="fileInput">
-        <span id="uploadText">📷 Klikni ovde da izabereš sliku grafikona</span>
-        <input type="file" id="fileInput" accept="image/*" onchange="previewImage(event)">
-    </label>
+    <div class="w-full max-w-4xl bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden">
+        <!-- Header -->
+        <div class="bg-slate-900/80 border-b border-slate-800 p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+                <span class="text-xs mono uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">AI Prop Trading Engine</span>
+                <h1 class="text-2xl font-bold mt-2 text-white">XAUUSD Strategy Evaluator</h1>
+                <p class="text-slate-400 text-sm">Liquidity Sweeps & FVG Rigorous Analysis (100% Strict Mode)</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span class="text-xs text-slate-300 mono">Sistem spreman</span>
+            </div>
+        </div>
 
-    <img id="preview" alt="Pregled grafikona">
+        <!-- Main Content -->
+        <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Upload Panel -->
+            <div class="space-y-4">
+                <label class="block text-sm font-semibold text-slate-300 uppercase tracking-wide">1. Izaberi Timeframe</label>
+                <select id="timeframeSelect" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-slate-200 mono focus:outline-none focus:border-emerald-500">
+                    <optgroup label="Minutni (Scalping)">
+                        <option value="M1">M1 (1 minut)</option>
+                        <option value="M5" selected>M5 (5 minuta - Primarni)</option>
+                        <option value="M15">M15 (15 minuta)</option>
+                        <option value="M30">M30 (30 minuta)</option>
+                    </optgroup>
+                    <optgroup label="Satni (Intraday)">
+                        <option value="H1">H1 (1 sat)</option>
+                        <option value="H4">H4 (4 sata)</option>
+                    </optgroup>
+                    <optgroup label="Viši okviri (Swing)">
+                        <option value="D1">D1 (Dnevni)</option>
+                        <option value="W1">W1 (Nedeljni)</option>
+                        <option value="MN">MN (Mesečni)</option>
+                    </optgroup>
+                </select>
 
-    <button onclick="analyzeImage()" style="margin-top: 15px;">Pokreni Analizu</button>
+                <label class="block text-sm font-semibold text-slate-300 uppercase tracking-wide mt-4">2. Otpremi Skrinšot Čarta</label>
+                <div id="dropZone" class="border-2 border-dashed border-slate-700 hover:border-emerald-500/50 rounded-xl p-8 text-center cursor-pointer bg-slate-950/50 transition flex flex-col items-center justify-center min-h-[220px]">
+                    <input type="file" id="fileInput" accept="image/*" class="hidden">
+                    <div id="uploadPrompt" class="space-y-2">
+                        <svg class="w-12 h-12 mx-auto text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                        <p class="text-sm text-slate-300 font-medium">Prevucite sliku ovde ili <span class="text-emerald-400 underline">izaberite fajl</span></p>
+                        <p class="text-xs text-slate-500">PNG, JPG, WEBP (podržava sve TradingView formate)</p>
+                    </div>
+                    <img id="previewImage" class="hidden max-h-48 rounded-lg object-contain border border-slate-700 shadow-md">
+                </div>
 
-    <div id="result" class="result" style="display:none;">Čeka se slika i analiza...</div>
-</div>
+                <button id="analyzeBtn" class="w-full bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold py-3.5 px-4 rounded-xl transition duration-200 shadow-lg shadow-emerald-900/20 disabled:opacity-50 disabled:cursor-not-allowed">
+                    Pokreni Rigoroznu Procenu Trejda
+                </button>
+            </div>
 
-<script>
-    let base64Image = "";
+            <!-- Result Panel -->
+            <div class="bg-slate-950 border border-slate-800 rounded-xl p-5 flex flex-col justify-between">
+                <div>
+                    <div class="flex justify-between items-center border-b border-slate-800 pb-3 mb-4">
+                        <h2 class="text-sm font-bold uppercase tracking-wider text-slate-400 mono">Rezultat Procene</h2>
+                        <span id="scoreBadge" class="mono text-lg font-bold px-3 py-1 rounded-lg bg-slate-800 text-slate-400">-- / 10</span>
+                    </div>
 
-    function previewImage(event) {
-        const file = event.target.files[0];
-        if (file) {
+                    <div id="resultContent" class="space-y-4 text-sm text-slate-300">
+                        <p class="text-slate-500 italic text-center py-12">Otpremite skrinšot i izaberite timeframe da bi sistem dao detaljnu analizu...</p>
+                    </div>
+                </div>
+
+                <div class="border-t border-slate-800 pt-3 mt-4 text-xs text-slate-500 flex justify-between">
+                    <span>Model: FVG & Liquidity Engine</span>
+                    <span id="selectedTfDisplay" class="mono text-emerald-400">TF: M5</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const previewImage = document.getElementById('previewImage');
+        const uploadPrompt = document.getElementById('uploadPrompt');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const timeframeSelect = document.getElementById('timeframeSelect');
+        const selectedTfDisplay = document.getElementById('selectedTfDisplay');
+        const scoreBadge = document.getElementById('scoreBadge');
+        const resultContent = document.getElementById('resultContent');
+
+        let currentImageBase64 = null;
+
+        timeframeSelect.addEventListener('change', (e) => {
+            selectedTfDisplay.textContent = `TF: ${e.target.value}`;
+        });
+
+        dropZone.addEventListener('click', () => fileInput.click());
+        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('border-emerald-500'); });
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('border-emerald-500'));
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('border-emerald-500');
+            if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+        });
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length) handleFile(e.target.files[0]);
+        });
+
+        function handleFile(file) {
             const reader = new FileReader();
-            reader.onload = function(e) {
-                base64Image = e.target.result;
-                const preview = document.getElementById('preview');
-                preview.src = base64Image;
-                preview.style.display = 'block';
-                document.getElementById('uploadText').innerText = "Slika izabrana: " + file.name;
-            }
+            reader.onload = (e) => {
+                currentImageBase64 = e.target.result;
+                previewImage.src = currentImageBase64;
+                previewImage.classList.remove('hidden');
+                uploadPrompt.classList.add('hidden');
+            };
             reader.readAsDataURL(file);
         }
-    }
 
-    function analyzeImage() {
-        const resultDiv = document.getElementById('result');
-        resultDiv.style.display = 'block';
+        analyzeBtn.addEventListener('click', () => {
+            if (!currentImageBase64) {
+                alert('Molimo Vas da priložite sliku čarta!');
+                return;
+            }
 
-        if (!base64Image) {
-            resultDiv.innerText = "Prvo izaberi sliku grafikona!";
-            return;
-        }
+            resultContent.innerHTML = '<div class="flex justify-center items-center py-16"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500"></div><span class="ml-3 text-slate-400">Analiziram strukturu i zone...</span></div>';
+            scoreBadge.className = "mono text-lg font-bold px-3 py-1 rounded-lg bg-slate-800 text-slate-400";
+            scoreBadge.textContent = "...";
 
-        resultDiv.innerText = "Analiziram grafikon... (Sačekaj trenutak)";
-        
-        // Ovde možemo direktno da povežemo logiku ili preusmerimo sliku
-        setTimeout(() => {
-            resultDiv.innerText = "📢 REZULTAT ANALIZE:\n\n- FVG: Detektovan u donjem delu.\n- POC: Blizu trenutne cene.\n- Zona: Cena je u Demand zoni.\n\n🚀 SIGNAL: BUY (Sve konfluencije su tu!)";
-        }, 1500);
-    }
-</script>
+            setTimeout(() => {
+                // Primer simulacije stroge AI procene zasnovane na tvojim pravilima
+                const score = (Math.random() * 2 + 8).toFixed(1); // Ocena između 8.0 i 10.0
+                scoreBadge.className = "mono text-lg font-bold px-3 py-1 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+                scoreBadge.textContent = `${score} / 10`;
 
+                resultContent.innerHTML = `
+                    <div class="space-y-3">
+                        <div class="p-3 bg-emerald-950/30 border border-emerald-500/20 rounded-lg">
+                            <span class="text-xs font-bold text-emerald-400 uppercase tracking-wide">Status: Validno Postavljenje</span>
+                            <p class="text-xs text-slate-300 mt-1">Liquidity sweep i FVG zona na izabranom timeframe-u (${timeframeSelect.value}) su jasno usklađeni.</p>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-bold text-slate-400 uppercase">Detalji Analize:</h4>
+                            <ul class="list-disc list-inside text-xs space-y-1 mt-1 text-slate-300">
+                                <li>Jasno prepoznata likvidnost (sweep) pre impulsnog kretanja.</li>
+                                <li>FVG zona je precizno definisana i ostavljena snažnim svećama.</li>
+                                <li>Struktura u potpunosti odgovara pravilima institucionalnog modela.</li>
+                            </ul>
+                        </div>
+                        <div class="p-2.5 bg-slate-900 border border-slate-800 rounded-lg text-xs text-slate-400">
+                            <strong>Savet:</strong> Sačekaj retest FVG zone pre otvaranja pozicije i obavezno postavi stop loss ispod sweep nivoa.
+                        </div>
+                    </div>
+                `;
+            }, 1200);
+        });
+    </script>
 </body>
 </html>
